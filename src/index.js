@@ -2,16 +2,30 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import {getCookie, setCookie} from "./utils/Cookie";
+import {register, getNotes} from "./utils/Api";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+if (getCookie("token") == null){
+    register().then(data => setCookie("token", data.token))
+        .then(() => {
+            getNotes(getCookie("token")).then(data => {
+                console.log(data);
+                ReactDOM.render(
+                    <React.StrictMode>
+                        <App tasks={data}/>
+                    </React.StrictMode>,
+                    document.getElementById('root')
+                );
+            })
+        });
+} else {
+    getNotes(getCookie("token")).then(data => {
+        console.log(data);
+        ReactDOM.render(
+            <React.StrictMode>
+                <App tasks={data}/>
+            </React.StrictMode>,
+            document.getElementById('root')
+        );
+    })
+}
